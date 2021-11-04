@@ -8,7 +8,7 @@ To run the codes, the following packages need to be installed:
 1. Numpy (>1.20.3)
 2. Scipy (>1.5.2)
 3. Networkx (>2.5)
-4. Eiren
+4. Eiren (https://github.com/Eetion/Eirene.jl)
 5. PHATE (>1.0.7)
 
 #### Installation with `pip`
