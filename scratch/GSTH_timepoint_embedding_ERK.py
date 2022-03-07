@@ -9,11 +9,9 @@ import phate
 from gtda.homology import VietorisRipsPersistence
 from gtda.plotting import plot_diagram
 
-
 import scipy.io as sio
 import matplotlib.pyplot as plt
 import phate
-
 
 def lazy_random_walk(adj):
     #if d == 0, P = 0
@@ -29,8 +27,6 @@ def lazy_random_walk(adj):
     #return P_array,P
     return P
 
-
-
 def graph_wavelet(P):
     psi = []
     #for d1 in range(1,t,2):
@@ -40,14 +36,10 @@ def graph_wavelet(P):
         psi.append(W_d1)
     return psi
 
-
-
 def zero_order_feature(A,ro):
     F0= np.matmul(LA.matrix_power(A,16),ro)
     
     return F0
-
-
 
 def first_order_feature(A,u):
     F1 = np.matmul(LA.matrix_power(A,16),np.abs(u))
@@ -56,8 +48,6 @@ def first_order_feature(A,u):
     #for i in range(1,t):
     F1 = np.concatenate(F1,0)
     return F1
-
-
 
 def selected_second_order_feature(A,W,u):
     u1 = np.einsum('ij,ajt ->ait',W[1],u[0:1])
@@ -69,10 +59,6 @@ def selected_second_order_feature(A,W,u):
     #F2 = np.sum(np.einsum('ijk,akt ->iajt',P,F1),2).reshape(len(P)*len(F1)*F,1)
     F2 = np.concatenate(F2,0)
     return F2
-
-
-
-
 
 def generate_timepoint_feature(adj,ro):
     #with zero order, first order and second order features
@@ -94,21 +80,25 @@ def generate_timepoint_feature(adj,ro):
     #F = np.concatenate((F,F3),axis=0)
     return F
 
-
-
-folders = ['Dataset']
+folders = ['/home/dhanajayb/Downloads/ERK_dataset/Output/Pos3Registration/processed']
 
 phate_data_all = []
 time_point_all = []
 files_all = []
 phate_operator_all = []
+
 for folder in folders:
+
     files = listdir(folder)
+
     for file in files:
+
         print('processing file',file)
         files_all.append(file)
         new_data = sio.loadmat(folder+'/'+file)
-        graph_size = new_data['cells_mean'].shape[1]
+        cells_mean = np.transpose(new_data['cells_mean'])
+        cells_mean = np.nan_to_num(cells_mean)
+        graph_size = cells_mean.shape[1]
         
         node_pool = []
         adj = np.zeros((graph_size,graph_size))
@@ -117,16 +107,21 @@ for folder in folders:
                 node_pool.append(j)
                 adj[i][j-1] = 1
                 adj[j-1][i] = 1
-                    
-        features = new_data['cells_mean'][:]
+
+        features = cells_mean[:]
         normalzied_features = (features-np.min(features,0).reshape(1,-1))/np.min(features,0).reshape(1,-1)
         normalzied_features_transpose = normalzied_features.transpose()
         feature_z = scipy.stats.mstats.zscore(normalzied_features_transpose,0)
+
+        print(np.min(features,0))
+        
         print('calculate scattering')
         scattering_feature = generate_timepoint_feature(adj,feature_z)
         time_point = np.arange(scattering_feature.shape[1])
-       
         scattering_feature_transpose = scattering_feature.transpose()
+
+        print(scattering_feature_transpose)
+
         print('calculate phate')
         phate_operator = phate.PHATE(n_components=3,knn=20)
         phate_data = phate_operator.fit_transform(scattering_feature_transpose)
@@ -139,9 +134,10 @@ for folder in folders:
 VR = VietorisRipsPersistence(homology_dimensions=[0, 1, 2])
 diagrams = VR.fit_transform(phate_data_all)
 np.save('diagram_all',diagrams)
+
 #plot phate trajectory
 fig = plt.figure(figsize=(16,8))
 ax1 = plt.subplot2grid(shape=(1,1), loc=(0,0),projection='3d')
-im1 = ax1.scatter(phate_data_all[1][:,0],phate_data_all[1][:,1],phate_data_all[1][:,2],c=time_point_all[1],s=5,cmap='inferno')
+im1 = ax1.scatter(phate_data_all[0][:,0],phate_data_all[0][:,1],phate_data_all[0][:,2],c=time_point_all[0],s=5,cmap='inferno')
 fig.colorbar(im1, ax=ax1,fraction=0.015,pad=0.08)
-#plt.savefig('cdkn1b+_210614_19-43-29',dpi=600)
+plt.savefig('cpDataTracked',dpi=600)

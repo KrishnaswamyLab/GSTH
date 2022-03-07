@@ -7,7 +7,6 @@ import phate
 
 from collections import defaultdict
 
-
 import scipy.io as sio
 from collections import Counter
 import matplotlib.pyplot as plt
@@ -23,8 +22,6 @@ def lazy_random_walk(adj):
  
     return P
 
-
-
 def graph_wavelet(P):
     psi = []
     for d1 in [1,2,4,8,16]:
@@ -32,21 +29,15 @@ def graph_wavelet(P):
         psi.append(W_d1)
     return psi
 
-
-
 def zero_order_feature(A,ro):
     F0= np.matmul(LA.matrix_power(A,16),ro)
     
     return F0
 
-
-
 def first_order_feature(A,u):
     F1 = np.matmul(LA.matrix_power(A,16),np.abs(u))
     F1 = np.concatenate(F1,1)
     return F1
-
-
 
 def selected_second_order_feature(A,W,u):
     u1 = np.einsum('ij,ajt ->ait',W[1],u[0:1])
@@ -56,10 +47,6 @@ def selected_second_order_feature(A,W,u):
     F2 = np.matmul(LA.matrix_power(A,16),u1)
     F2 = np.concatenate(F2,1)
     return F2
-
-
-
-
 
 def generate_celluar_feature(adj,ro):
     #with zero order, first order and second order features
@@ -76,8 +63,7 @@ def generate_celluar_feature(adj,ro):
     return F
 
 
-folders = ['Dataset']
-
+folders = ['/home/dhanajayb/Downloads/diff_data/mat']
 
 phate_data_all = []
 cell_cycle_all = []
@@ -86,8 +72,11 @@ neighbor_size_all = []
 phate_operator_all = []
 features_all = []
 n_flash_all = []
+
 for folder in folders:
+    
     files = listdir(folder)
+    
     for file in files:
         print('processing file',file)
         new_data = sio.loadmat(folder+'/'+file)
@@ -144,8 +133,6 @@ for folder in folders:
         neighbor_size_all.append(neighbor_size)
         lingering_time_all.append(max_linging_time_info)
         n_flash_all.append(n_flash)
-
-
 
 
 #an example of plotting phate trajectory of celluar embeddings according to the cell cycle information

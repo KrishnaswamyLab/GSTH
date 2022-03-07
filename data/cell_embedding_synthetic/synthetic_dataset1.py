@@ -9,24 +9,17 @@ from sklearn.decomposition import PCA
 import phate
 import matplotlib.pyplot as plt
 
-
-
 new_data = sio.loadmat('cdkn1b/positive/hyperstack_200301_15-23-52_green_crop2_ALL_CELLS_plus.mat')
-
-
 
 node_pool = []
 adj = np.zeros((1867,1867))
 for i,l in enumerate(new_data['nbList']):
     if i==1024:
         print(l)
-    for j in l[0][0]:
-  
+    for j in l[0][0]:  
         node_pool.append(j)
         adj[i][j-1] = 1
         adj[j-1][i] = 1
-
-
 
 toy_feature = np.zeros(1867)
 toy_feature[256] = 1
@@ -34,16 +27,12 @@ G = nx.from_numpy_matrix(adj)
 L = nx.normalized_laplacian_matrix(G)
 M = L.toarray()
 
-
-
 simulate_signal = []
 simulate_signal.append(toy_feature)
 temp = toy_feature
 for i in range(20):
     temp = np.matmul(M,temp)
     simulate_signal.append(temp)
-
-
 
 simulate_signal_ = np.array(simulate_signal).transpose()
 distance_to_center = []
@@ -55,14 +44,11 @@ for i in range(1867):
         d = 45
     distance_to_center.append(d)
 
-
 wave_pool = []
 
 for i in range(1867):
     if sum(simulate_signal_[i])!=0:
         wave_pool.append(i)
-
-
 
 single_pool = []
 single_num = 1867 - len(wave_pool)
@@ -76,6 +62,7 @@ for i in range(1867):
         sin_signal1 = [np.sin(1/20*np.pi*x) for x in range(5)]
         p = np.random.randint(14)
         simulate_signal_[n][p:p+5] = np.array(sin_signal1)
+
 
 
 def lazy_random_walk(adj):
@@ -106,8 +93,7 @@ def graph_wavelet(P):
 
 
 def zero_order_feature(A,ro):
-    F0= np.matmul(LA.matrix_power(A,16),ro)
-    
+    F0 = np.matmul(LA.matrix_power(A,16),ro)    
     return F0
 
 
@@ -132,8 +118,6 @@ def selected_second_order_feature(A,W,u):
     #F2 = np.sum(np.einsum('ijk,akt ->iajt',P,F1),2).reshape(len(P)*len(F1)*F,1)
     F2 = np.concatenate(F2,1)
     return F2
-
-
 
 
 
