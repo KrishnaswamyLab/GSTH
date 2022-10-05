@@ -24,9 +24,12 @@ using SharedArrays
     
     #fpaths = Glob.glob("Homeostatic/*.npy")
 
-    npzwrite("wasserstein_control_cKO_filepaths.npy", fpaths)
-
     num_files = length(fpaths)
+end
+
+fh = open("wasserstein_control_cKO_filepaths.txt", "w")
+for fpath in fpaths
+    println(fh, fpath)
 end
 
 wass_H0 = SharedArray{Float64, 2}((num_files, num_files))
