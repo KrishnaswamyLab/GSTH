@@ -1,3 +1,5 @@
+import os, sys, time
+
 from os import listdir
 
 import numpy as np
@@ -16,6 +18,10 @@ import matplotlib.pyplot as plt
 
 from scattering import *
 
+SHUFFLE = False
+SAMPLE = True
+DIST = "normal"
+rng_seed = int(time.time())
 
 folders = ['/home/dhanajayb/Downloads/GSTH_test/mat']
 
@@ -44,6 +50,27 @@ for folder in folders:
                 adj[j-1][i] = 1
                     
         features = new_data['cells_mean'][:]
+
+        if SHUFFLE:
+            np.random.seed(rng_seed)
+            features = features[:, np.random.permutation(features.shape[1])]
+
+        if SAMPLE:
+            np.random.seed(rng_seed)
+            if DIST == "uniform":
+                sig_max = np.percentile(features[:], 0.8)
+                sig_min = np.percentile(features[:], 0.2)
+                features = np.random.uniform(sig_min, sig_max, features.shape)
+            elif DIST == "normal":
+                sig_mean = np.mean(features[:])
+                sig_std = np.std(features[:])
+                features = np.random.normal(sig_mean, sig_std, features.shape)      
+            else:
+                print("ERROR: Unknown distribution.")
+                sys.exit(1)
+
+            features = features[:, np.random.permutation(features.shape[1])]
+
         normalzied_features = (features-np.min(features,0).reshape(1,-1))/np.min(features,0).reshape(1,-1)
         normalzied_features_transpose = normalzied_features.transpose()
         feature_z = scipy.stats.mstats.zscore(normalzied_features_transpose,0)
@@ -64,11 +91,21 @@ for folder in folders:
 # calculate VietorisRipsPersistence
 VR = VietorisRipsPersistence(homology_dimensions=[0, 1, 2])
 diagrams = VR.fit_transform(phate_data_all)
-np.save('diagram_all',diagrams)
+if SHUFFLE:
+    np.save('diagram_shuffle_'+str(rng_seed),diagrams)
+elif SAMPLE:
+    np.save('diagram_sample_'+DIST+'_'+str(rng_seed),diagrams)
+else:
+    np.save('diagram_all',diagrams)
 
 # plot phate trajectory
 fig = plt.figure(figsize=(16,8))
 ax1 = plt.subplot2grid(shape=(1,1), loc=(0,0),projection='3d')
 im1 = ax1.scatter(phate_data_all[0][:,0],phate_data_all[0][:,1],phate_data_all[0][:,2],c=time_point_all[0],s=5,cmap='inferno')
 fig.colorbar(im1, ax=ax1,fraction=0.015,pad=0.08)
-plt.savefig('timelapse_embedding',dpi=600)
+if SHUFFLE:
+    plt.savefig('timelapse_embedding_shuffle_'+str(rng_seed),dpi=600)
+elif SAMPLE:
+    plt.savefig('timelapse_embedding_sample_'+DIST+'_'+str(rng_seed),dpi=600)
+else:
+    plt.savefig('timelapse_embedding',dpi=600)

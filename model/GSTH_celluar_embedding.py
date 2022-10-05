@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from scattering import *
 
 
-folders = ['/home/dhanajayb/Downloads/GSTH_test/mat']
+folders = ['/home/dhanajayb/Downloads/CaSignalingDataset/K10/']
 
 phate_data_all = []
 cell_cycle_all = []
@@ -26,7 +26,7 @@ phate_operator_all = []
 features_all = []
 n_flash_all = []
 
-for folder in folders:
+for folder in folders[:2]:
 
     files = listdir(folder)
     
@@ -35,7 +35,7 @@ for folder in folders:
         print('processing file',file)
         new_data = sio.loadmat(folder+'/'+file)
         graph_size = new_data['cells_mean'].shape[1]
-        cell_cycle = new_data['events_info'][:,-1]
+        cell_cycle = new_data['events_info'][:,7]
         n_flash = new_data['events_info'][:,1]
         print(cell_cycle)
         
@@ -78,25 +78,17 @@ for folder in folders:
         print('calculate phate')
         phate_operator = phate.PHATE(n_components=3,knn=50)
         phate_data = phate_operator.fit_transform(scattering_feature)
-        
-        phate_data_all.append(phate_data)
-        cell_cycle_all.append(cell_cycle)
-        phate_operator_all.append(phate_operator)
-        features_all.append(normalzied_features)
-        neighbor_size_all.append(neighbor_size)
-        lingering_time_all.append(max_linging_time_info)
-        n_flash_all.append(n_flash)
 
-# plot phate trajectory of celluar embeddings according to the cell cycle information
-cols = []
-for v in cell_cycle_all[0]:
-    if v==1:
-        cols.append('navy')
-    else:
-        cols.append('orange')
+        # plot phate trajectory of celluar embeddings according to the cell cycle information
+        cols = []
+        for v in cell_cycle:
+            if v==1:
+                cols.append('navy')
+            else:
+                cols.append('orange')
 
-fig = plt.figure(figsize=(16,8))
-ax1 = plt.subplot2grid(shape=(1,1), loc=(0,0),projection='3d')
-ax1.view_init(30, 110)
-im1 = ax1.scatter(phate_data_all[0][:,0],phate_data_all[0][:,1],phate_data_all[0][:,2],c=cols,s=5)
-plt.savefig('cell_embedding',dpi=600)
+        fig = plt.figure(figsize=(16,8))
+        ax1 = plt.subplot2grid(shape=(1,1), loc=(0,0),projection='3d')
+        ax1.view_init(30, 110)
+        im1 = ax1.scatter(phate_data[:,0],phate_data[:,1],phate_data[:,2],c=cols,s=5)
+        plt.savefig('cell_embedding_'+file+'.png', dpi=600)

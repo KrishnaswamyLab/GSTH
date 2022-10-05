@@ -1,3 +1,4 @@
+# OS X
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
@@ -16,3 +17,9 @@ venv/
 
 # PyCharm
 .idea/
+
+# Plots
+*.png
+
+# Results
+*.npy
