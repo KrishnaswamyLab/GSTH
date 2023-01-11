@@ -15,8 +15,7 @@ import matplotlib.pyplot as plt
 
 from scattering import *
 
-
-folders = ['/home/dhanajayb/Downloads/CaSignalingDataset/K10/']
+folders = ['/home/dhanajayb/Downloads/CaSignalingDataset/1_Fucci2/']
 
 phate_data_all = []
 cell_cycle_all = []
@@ -83,12 +82,14 @@ for folder in folders[:2]:
         cols = []
         for v in cell_cycle:
             if v==1:
-                cols.append('navy')
+                cols.append('magenta')
             else:
-                cols.append('orange')
+                cols.append('darkgreen')
 
         fig = plt.figure(figsize=(16,8))
         ax1 = plt.subplot2grid(shape=(1,1), loc=(0,0),projection='3d')
         ax1.view_init(30, 110)
         im1 = ax1.scatter(phate_data[:,0],phate_data[:,1],phate_data[:,2],c=cols,s=5)
         plt.savefig('cell_embedding_'+file+'.png', dpi=600)
+
+        np.save('cell_embedding_'+file+'.npy', {'x':phate_data[:,0], 'y':phate_data[:,1], 'z':phate_data[:,2], 'c':cell_cycle})
