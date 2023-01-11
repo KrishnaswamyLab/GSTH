@@ -23,7 +23,7 @@ SAMPLE = False
 DIST = "normal"
 rng_seed = int(time.time())
 
-files = ["simulationResults/Figure_2_Seed_1000/spikes.npy"]
+files = ["simulationResults/Figure_2_Seed_1000/ICT.npy"]
 
 for file in files:
 
