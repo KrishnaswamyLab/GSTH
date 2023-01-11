@@ -23,7 +23,7 @@ SAMPLE = False
 DIST = "normal"
 rng_seed = int(time.time())
 
-files = ["simulationResults/Figure_2_Seed_1000/Fluttering.npy"]
+files = ["simulationResults/Figure_2_Seed_1000/spikes.npy"]
 
 for file in files:
 
@@ -31,7 +31,7 @@ for file in files:
     print('processing file', fname)
 
     dat = np.load(file, allow_pickle=True).item()
-    new_data = dat['dynamics'][:,0,:5000]
+    new_data = dat['dynamics'][:,0,::10]
     new_data = new_data.T
     print(new_data.shape)
     graph_size = new_data.shape[1]
@@ -61,8 +61,8 @@ for file in files:
 
         features = features[:, np.random.permutation(features.shape[1])]
 
-    normalized_features = (features-np.min(features,0).reshape(1,-1))/(np.min(features,0).reshape(1,-1)+1e-5)
-    normalized_features_transpose = normalized_features.transpose()
+    #normalized_features = (features-np.min(features,0).reshape(1,-1))/np.min(features,0).reshape(1,-1)
+    #normalized_features_transpose = normalized_features.transpose()
     normalized_features_transpose = features.transpose()
     feature_z = scipy.stats.mstats.zscore(normalized_features_transpose,0)
 
@@ -71,9 +71,11 @@ for file in files:
     time_point = np.arange(scattering_feature.shape[1])
     scattering_feature_transpose = scattering_feature.transpose()
 
+    np.save(fname + '_scattering_feats', scattering_feature_transpose)
+
     print('calculate phate')
     phate_operator = phate.PHATE(n_components=3,knn=20)
-    phate_data = phate_operator.fit_transform(scattering_feature_transpose)
+    phate_data = phate_operator.fit_transform(scattering_feature_transpose[1:,:])
 
     # calculate VietorisRipsPersistence
     VR = VietorisRipsPersistence(homology_dimensions=[0, 1])   # DB: removed 2
@@ -88,7 +90,7 @@ for file in files:
     # plot phate trajectory
     fig = plt.figure(figsize=(16,8))
     ax1 = plt.subplot2grid(shape=(1,1), loc=(0,0), projection='3d')
-    im1 = ax1.scatter(phate_data[:,0], phate_data[:,1], phate_data[:,2], c=time_point, s=5, cmap='inferno')
+    im1 = ax1.scatter(phate_data[:,0], phate_data[:,1], phate_data[:,2], c=time_point[1:], s=5, cmap='inferno')
     fig.colorbar(im1, ax=ax1, fraction=0.015, pad=0.08)
     if SHUFFLE:
         plt.savefig(fname + '_timelapse_embedding_shuffle_' + str(rng_seed), dpi=600)
