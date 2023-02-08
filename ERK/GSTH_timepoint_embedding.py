@@ -1,5 +1,4 @@
-import os, sys, time
-
+import os, sys, time, glob
 from os import listdir
 
 import numpy as np
@@ -23,22 +22,19 @@ SAMPLE = False
 DIST = "normal"
 rng_seed = int(time.time())
 
-files = ["BRAF_Co_Dox.mat"]
+files = glob.glob("data_RatioCNERK/*.mat")
 
-for file in files:
+for fpath in files:
 
-    fname = os.path.splitext(os.path.basename(file))[0]
+    fname = os.path.splitext(os.path.basename(fpath))[0]
     print('processing file', fname)
 
-    dat = sio.loadmat(file)
+    dat = sio.loadmat(fpath)
 
-    new_data = dat["cellmean"]
-    new_data = new_data.T
-    print(new_data.shape)
+    new_data = dat["cellmean"].T
     graph_size = new_data.shape[1]
     
-    node_pool = []
-    adj = dat['A']
+    adj = np.array(dat['A'].todense())
                 
     features = new_data[:]
 
