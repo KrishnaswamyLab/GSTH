@@ -21,7 +21,7 @@ for fid = 1:numel(dirData)
         peak_idxs = find(overallEvents(:,1) == cid);
         num_peaks = numel(peak_idxs);
     
-        % Plot for debugging
+        % plot for debugging
         % plot_signal(cid, cell_signal, ctype, num_timepoints, peak_idxs, overallEvents)
 
         if num_peaks > 1
@@ -41,15 +41,18 @@ for fid = 1:numel(dirData)
 
 end
 
-% plot
+% violin plot
 [h,L,MX,MED] = violin({K10_pos, K10_neg}, 'xlabel', {'K10+', 'K10-'});
 ylabel('Time [min]', 'FontSize', 14)
 
+% box plot and p-value
 all_obs = [K10_pos; K10_neg];
 labels = [repmat("K10+", numel(K10_pos), 1); repmat("K10-", numel(K10_neg), 1)];
 p = kruskalwallis(all_obs, labels);
 H = sigstar({[1,2]}, p);
 ylabel('Time [min]', 'FontSize', 14)
+
+% helper functions
 
 function plot_signal(cid, sig, ctype, nt, peak_indices, events)
     figure()
